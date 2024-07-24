@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Image to Web</title>
+</head>
+
+<body style="margin: 0; padding: 0;">
+
+  <img id="image" src="./db-generate.png" alt="imagen" style="display: none;">
+  <canvas id="miCanvas" style="display: none;"></canvas>
+  <div id="root"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const img = document.getElementById('image');
+      const canvas = document.getElementById('miCanvas');
+      const ctx = canvas.getContext('2d');
+      let imgToText = '';
+
+      img.onload = function () {
+        // Ajusta el tamaño del canvas al de la imagen
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Dibuja la imagen en el canvas
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+        // Obtiene los datos de la imagen
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Itera sobre cada píxel
+        for (let i = 0; i < data.length; i += 4) {
+          const red = data[i];
+          const green = data[i + 1];
+          const blue = data[i + 2];
+          const alpha = data[i + 3];
+
+          // Aquí puedes procesar cada píxel como desees
+          //console.log(`Píxel ${i / 4}: R=${red}, G=${green}, B=${blue}, A=${alpha}`)
+
+          if (red <= 127 && green <= 127 && blue <= 127) {
+            imgToText = imgToText.concat('', '1');
+          } else if (red >= 250 && green >= 250 && blue >= 250 ) {
+            imgToText = imgToText.concat('', '0');
+          }
+        }
+
+        // Si has modificado los píxeles, puedes volver a poner la imagen en el canvas:
+        // ctx.putImageData(imageData, 0, 0);
+        decodeBinary(imgToText)
+      };
+    });
+
+    function decodeBinary(params) {
+      console.log('pase')
+      const bytes = params.match(/.{1,8}/g);
+      const html = bytes.map(byte => String.fromCharCode(parseInt(byte, 2))).join('');
+      document.getElementById('root').innerHTML = html.replaceAll('ÿ', '');
+    }
+  </script>
+</body>
+
+</html>
